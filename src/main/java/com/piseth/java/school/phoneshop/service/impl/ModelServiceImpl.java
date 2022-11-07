@@ -8,7 +8,10 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
+import com.piseth.java.school.phoneshop.utils.PageUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Order;
 import org.springframework.data.jpa.domain.Specification;
@@ -51,7 +54,9 @@ public class ModelServiceImpl implements ModelService{
 	}
 	
 	@Override
-	public List<Model> getModels(Map<String, String> params) {
+	public Page<Model> getModels(Map<String, String> params) {
+		Pageable pageable = PageUtils.getPageable(params);
+
 		ModelFilter modelFilter = new ModelFilter();
 		if(params.containsKey("modelId")) {
 			modelFilter.setModelId(MapUtils.getInteger(params, "modelId"));
@@ -65,9 +70,10 @@ public class ModelServiceImpl implements ModelService{
 		if(params.containsKey("brandName")) {
 			modelFilter.setBrandName(MapUtils.getString(params, "brandName"));
 		}
-		
+
 		ModelSpec modelSpec = new ModelSpec(modelFilter);
-		return modelRepository.findAll(modelSpec, Sort.by(Order.asc("id")));
+
+		return modelRepository.findAll(modelSpec, pageable);
 	}
 
 	public List<Model> getModelsOld(Map<String, String> params) {
@@ -89,14 +95,12 @@ public class ModelServiceImpl implements ModelService{
 		Specification<Model> specification = (model,  query, cb) ->{
 			if(params.containsKey("name")) {
 				String modelName = params.get("name");
-				Predicate predicateName = cb.like(model.get("name"), "%"+modelName + "%");
-				return predicateName;
+				return cb.like(model.get("name"), "%"+modelName + "%");
 			}
 			
 			return null;
 		};
-		List<Model> list = modelRepository.findAll(specification, Sort.by(Order.asc("id")));
-		return list;
+		return modelRepository.findAll(specification, Sort.by(Order.asc("id")));
 	}
 
 }

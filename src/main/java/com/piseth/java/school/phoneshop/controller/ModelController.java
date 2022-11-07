@@ -3,6 +3,9 @@ package com.piseth.java.school.phoneshop.controller;
 import java.util.List;
 import java.util.Map;
 
+import com.piseth.java.school.phoneshop.dto.PageDTO;
+import com.piseth.java.school.phoneshop.mapper.PageMapper;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,29 +27,35 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/models")
 public class ModelController {
-	
-	private final ModelService modelService;
-	
-	@PostMapping
-	public ResponseEntity<?> create(@RequestBody ModelDTO dto) throws ApiException{
-		Model model = modelService.save(dto);
-		ModelDTO modelDTO = ModelMapper.INSTANCE.toDTO(model);
-		return ResponseEntity.ok(modelDTO);
-	}
-	
-	@GetMapping("{id}")
-	public ResponseEntity<?> getById(@PathVariable("id") int id) throws ApiException{
-		Model model = modelService.getById(id);
-		return ResponseEntity.ok(ModelMapper.INSTANCE.toDTO(model));
-	}
-	
-	@GetMapping
-	public ResponseEntity<?> getModelList(@RequestParam Map<String, String> params){
-		List<ModelDTO> list = modelService.getModels(params)
-			.stream()
-			.map(m -> ModelMapper.INSTANCE.toDTO(m))
-			.toList();
-		return ResponseEntity.ok(list);
-	}
+
+    private final ModelService modelService;
+
+    @PostMapping
+    public ResponseEntity<?> create(@RequestBody ModelDTO dto) throws ApiException {
+        Model model = modelService.save(dto);
+        ModelDTO modelDTO = ModelMapper.INSTANCE.toDTO(model);
+        return ResponseEntity.ok(modelDTO);
+    }
+
+    @GetMapping("{id}")
+    public ResponseEntity<?> getById(@PathVariable("id") int id) throws ApiException {
+        Model model = modelService.getById(id);
+        return ResponseEntity.ok(ModelMapper.INSTANCE.toDTO(model));
+    }
+
+    @GetMapping
+    public ResponseEntity<?> getModelList(@RequestParam Map<String, String> params) {
+//		List<ModelDTO> list = modelService.getModels(params)
+//			.stream()
+//			.map(m -> ModelMapper.INSTANCE.toDTO(m))
+//			.toList();
+
+        Page<Model> page = modelService.getModels(params);
+
+        PageDTO dto = PageMapper.INSTANCE.toDTO(page);
+        dto.setList(page.get().map(ModelMapper.INSTANCE::toDTO).toList());
+
+        return ResponseEntity.ok(dto);
+    }
 
 }
