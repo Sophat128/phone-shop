@@ -1,9 +1,10 @@
 package com.piseth.java.school.phoneshop.controller;
 
-import java.util.List;
 import java.util.Map;
 
 import com.piseth.java.school.phoneshop.dto.PageDTO;
+import com.piseth.java.school.phoneshop.jwt.service.Authenticate;
+import com.piseth.java.school.phoneshop.jwt.service.AuthenticationRequest;
 import com.piseth.java.school.phoneshop.mapper.PageMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +30,16 @@ import lombok.RequiredArgsConstructor;
 public class ModelController {
 
     private final ModelService modelService;
+    private final Authenticate authenticate;
 
+    @PostMapping("/authenticate")
+    public ResponseEntity<?> createTokenForAuthentication(@RequestBody AuthenticationRequest authRequest){
+       return authenticate.authenticate(authRequest);
+    }
+    @GetMapping("/hello")
+    public String hello(){
+        return "Hello";
+    }
     @PostMapping
     public ResponseEntity<?> create(@RequestBody ModelDTO dto) throws ApiException {
         Model model = modelService.save(dto);
